@@ -1,6 +1,9 @@
 
 using ArticlesWebApi.Data;
+using ArticlesWebApi.Interfaces;
+using ArticlesWebApi.Repository;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace ArticlesWebApi
 {
@@ -13,9 +16,22 @@ namespace ArticlesWebApi
             // Add services to the container.
 
             builder.Services.AddControllers();
+
+            //Mapping
+            builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+
+            //Interfaces && Repository
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory,
+                    $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
+            });
 
 
             //ConnectionString
@@ -41,6 +57,13 @@ namespace ArticlesWebApi
             app.MapControllers();
 
             app.Run();
+        }
+        private static string GetXmlCommentsPath()
+        {
+            // Get the XML file path where the XML comments are generated during build
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = AppContext.BaseDirectory;
+            return System.IO.Path.Combine(xmlPath, xmlFile);
         }
     }
 }
