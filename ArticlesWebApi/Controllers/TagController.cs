@@ -1,6 +1,7 @@
 ﻿using ArticlesWebApi.Dto;
 using ArticlesWebApi.Interfaces;
 using ArticlesWebApi.Models;
+using ArticlesWebApi.Repository;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,81 +9,81 @@ namespace ArticlesWebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController : Controller
+    public class TagController : Controller
     {
-        private readonly IUserRepository _userRepository;
+        private readonly ITagRepository _tagRepository;
         private readonly IMapper _mapper;
 
-        public UserController(IUserRepository userRepository, IMapper mapper)
+        public TagController(ITagRepository tagRepository, IMapper mapper)
         {
-            _userRepository = userRepository;
+            _tagRepository = tagRepository;
             _mapper = mapper;
         }
 
-
         /// <summary>
-        /// Gets users
+        /// Gets all tags
         /// </summary>
+        /// <returns>
+        /// Must return all tags
+        /// </returns>
         [HttpGet]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<User>))]
-        public IActionResult GetUsers()
+        [ProducesResponseType(200, Type = typeof(IEnumerable<Tag>))]
+        public IActionResult GetTags()
         {
-            var users = _mapper.Map<List<UserDto>>(_userRepository.GetUsers());
+            var tags = _mapper.Map<List<TagDto>>(_tagRepository.GetTags());
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            return Ok(users);
+            return Ok(tags);
         }
 
-
-
         /// <summary>
-        /// Gets user by id
+        /// Get tag by id
         /// </summary>
-        [HttpGet("{userId}")]
-        [ProducesResponseType(200, Type = typeof(User))]
+        [HttpGet("{tagId}")]
+        [ProducesResponseType(200, Type = typeof(Tag))]
         [ProducesResponseType(400)]
-        public IActionResult GetUser(int userId)
+        public IActionResult GetTag(int tagId)
         {
-            if (!_userRepository.UserExists(userId))
+            if (!_tagRepository.TagExists(tagId))
                 return NotFound();
 
-            var user = _mapper.Map<UserDto>(_userRepository.GetUser(userId));
+            var tag = _mapper.Map<TagDto>(_tagRepository.GetTag(tagId));
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            return Ok(user);
+            return Ok(tag);
         }
 
         /// <summary>
-        /// Create new user
+        /// Create new tag
         /// </summary>
         [HttpPost]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public IActionResult CreateUser([FromBody] UserDto userCreate)
+        public IActionResult CreateTag([FromBody] TagDto tagCreate)
         {
-            if (userCreate == null)
+            if (tagCreate == null)
                 return BadRequest(ModelState);
 
-            var user = _userRepository.GetUsers().
-                Where(c => c.Name.Trim().ToUpper() == userCreate.Name.TrimEnd().ToUpper())
+            var tag = _tagRepository.GetTags().
+                Where(c => c.Name.Trim().ToUpper() == tagCreate.Name.TrimEnd().ToUpper())
                 .FirstOrDefault();
 
-            if (user != null)
+            if (tag != null)
             {
-                ModelState.AddModelError("", "User already exists");
+                ModelState.AddModelError("", "Tag already exists");
                 return StatusCode(422, ModelState);
             }
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var userMap = _mapper.Map<User>(userCreate);
+            var tagMap = _mapper.Map<Tag>(tagCreate);
 
-            if (!_userRepository.CreateUser(userMap))
+            if (!_tagRepository.CreateTag(tagMap))
             {
                 ModelState.AddModelError("", "Something went wrong while savin");
                 return StatusCode(500, ModelState);
@@ -95,31 +96,31 @@ namespace ArticlesWebApi.Controllers
 
 
         /// <summary>
-        /// Update user by id
+        /// Update tag by id
         /// </summary>
-        [HttpPut("userId")]
+        [HttpPut("tagId")]
         [ProducesResponseType(400)]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public IActionResult UpdateUser(int userId, [FromBody] UserDto updatedUser)
+        public IActionResult UpdateTag(int tagId, [FromBody] TagDto updatedTag)
         {
-            if (updatedUser == null)
+            if (updatedTag == null)
                 return BadRequest(ModelState);
 
-            if (userId != updatedUser.Id)
+            if (tagId != updatedTag.Id)
                 return BadRequest(ModelState);
 
-            if (!_userRepository.UserExists(userId))
+            if (!_tagRepository.TagExists(tagId))
                 return NotFound();
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var userMap = _mapper.Map<User>(updatedUser);
+            var tagMap = _mapper.Map<Tag>(updatedTag);
 
-            if (!_userRepository.UpdateUser(userMap))
+            if (!_tagRepository.UpdateTag(tagMap))
             {
-                ModelState.AddModelError("", "Something went wrong updating user");
+                ModelState.AddModelError("", "Something went wrong updating tag");
                 return StatusCode(500, ModelState);
             }
 
@@ -127,29 +128,29 @@ namespace ArticlesWebApi.Controllers
         }
 
         /// <summary>
-        /// Delete user by id
+        /// Delete tag by id
         /// </summary>
-        [HttpDelete("{userId}")]
+        [HttpDelete("{tagId}")]
         [ProducesResponseType(400)]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public IActionResult DeleteUser (int userId)
+        public IActionResult DeleteTag(int tagId)
         {
-            if (!_userRepository.UserExists(userId))
+            if (!_tagRepository.TagExists(tagId))
             {
                 return NotFound();
             }
 
-            var userToDelete = _userRepository.GetUser(userId);
+            var userToDelete = _tagRepository.GetTag(tagId);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (!_userRepository.DeleteUser(userToDelete))
+            if (!_tagRepository.DeleteTag(userToDelete))
             {
-                ModelState.AddModelError("", "Something went wrong deleting user");
+                ModelState.AddModelError("", "Something went wrong deleting tag");
             }
-
+             
             return NoContent();
         }
 

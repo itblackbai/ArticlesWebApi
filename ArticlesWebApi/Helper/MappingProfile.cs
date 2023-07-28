@@ -10,6 +10,14 @@ namespace ArticlesWebApi.Helper
          {
             CreateMap<User, UserDto>();
             CreateMap<UserDto, User>();
-         }
+            CreateMap<Tag, TagDto>();
+            CreateMap<TagDto, Tag>();
+            CreateMap<Article, ArticleDto>();
+            CreateMap<ArticleDto, Article>();
+            CreateMap<Coments, ComentsDto>();
+            CreateMap<ComentsDto, Coments>();
+           
+
+        }
     }
 }
